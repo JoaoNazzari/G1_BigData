@@ -1,0 +1,21 @@
+CREATE OR REPLACE FUNCTION atualizar_consulta_com_prescricao()
+RETURNS TRIGGER AS $$
+BEGIN
+        UPDATE consulta 
+    SET possui_prescricao = possui_prescricao + 1
+    WHERE consulta_id = NEW.consulta_id;
+
+    IF (SELECT possui_prescricao FROM consulta WHERE consulta_id = NEW.consulta_id) = 1 THEN
+        UPDATE consulta
+        SET data_execucao = CURRENT_TIMESTAMP
+        WHERE consulta_id = NEW.consulta_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER prescricao_after_insert
+AFTER INSERT ON prescricao
+FOR EACH ROW
+EXECUTE FUNCTION atualizar_consulta_com_prescricao();

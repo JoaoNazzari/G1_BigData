@@ -1,0 +1,21 @@
+CREATE OR REPLACE FUNCTION dias_ultima_consulta(paciente_id_param INT)
+RETURNS INT AS $$
+DECLARE
+    ultima_data_execucao TIMESTAMP;
+    dias INT;
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM paciente WHERE paciente_id = paciente_id_param) THEN
+        RAISE EXCEPTION 'Paciente com o ID % não encontrado.', paciente_id_param;
+    END IF;
+
+    SELECT MAX(data_execucao) INTO ultima_data_execucao FROM consulta WHERE paciente_id = paciente_id_param;
+    
+    IF ultima_data_execucao IS NULL THEN
+        RETURN 'A consulta ainda não foi realizada';
+    ELSE
+
+        dias := ABS(EXTRACT(DAY FROM CURRENT_TIMESTAMP - ultima_data_execucao));
+        RETURN dias;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;

@@ -1,0 +1,21 @@
+CREATE OR REPLACE PROCEDURE obter_ultimo_agendamento(
+    in_paciente_id IN INT,
+    out_consulta OUT RECORD
+)
+AS
+$$
+BEGIN
+ 
+    PERFORM 1 FROM paciente WHERE paciente_id = in_paciente_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Paciente não encontrado';
+    END IF;
+
+    SELECT * INTO out_consulta
+    FROM consulta
+    WHERE paciente_id = in_paciente_id
+    ORDER BY data_agendamento DESC
+    LIMIT 1;
+END;
+$$
+LANGUAGE plpgsql;

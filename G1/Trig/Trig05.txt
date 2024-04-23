@@ -1,0 +1,23 @@
+CREATE OR REPLACE FUNCTION valida_troca_leito()
+RETURNS TRIGGER AS
+$$
+DECLARE
+    leito_status BOOLEAN;
+BEGIN
+    SELECT status_ocupacao INTO leito_status
+    FROM leito
+    WHERE leito_id = NEW.leito_id;
+
+    IF leito_status = TRUE THEN
+        RAISE EXCEPTION 'Não é permitido trocar o paciente. Leito ocupado.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER internacao_before_update
+BEFORE UPDATE ON internacao
+FOR EACH ROW
+EXECUTE FUNCTION valida_troca_leito();

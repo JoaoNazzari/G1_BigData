@@ -1,0 +1,18 @@
+CREATE OR REPLACE FUNCTION obter_codigo_internacao(paciente_id_param INT)
+RETURNS INT
+AS $$
+DECLARE
+    codigo_internacao INT;
+BEGIN
+    SELECT internacao_id INTO codigo_internacao
+    FROM internacao
+    WHERE paciente_id = obter_codigo_internacao.paciente_id_param
+    AND data_liberacao IS NULL;
+
+    IF codigo_internacao IS NULL THEN
+        RAISE EXCEPTION 'Paciente não está atualmente internado.';
+    END IF;
+
+    RETURN codigo_internacao;
+END;
+$$ LANGUAGE plpgsql;

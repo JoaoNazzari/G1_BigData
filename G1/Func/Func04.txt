@@ -1,0 +1,26 @@
+CREATE OR REPLACE FUNCTION alteracoes_preco_comercial(
+    medicamento_id_param INT, 
+    dias_param INT
+)
+RETURNS INT
+AS $$
+DECLARE
+    qtd_alteracoes INT;
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM medicamento WHERE medicamento_id = medicamento_id_param) THEN
+        RAISE EXCEPTION 'Medicamento não encontrado';
+    END IF;
+
+    SELECT COUNT(*) INTO qtd_alteracoes
+    FROM medicamento_controle
+    WHERE medicamento_id = medicamento_id_param
+    AND data_modificacao >= CURRENT_DATE - dias_param;
+	
+	IF qtd_alteracoes IS NULL THEN
+        qtd_alteracoes := 0;
+    END IF;
+
+    RETURN qtd_alteracoes;
+END;
+$$
+LANGUAGE plpgsql;

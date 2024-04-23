@@ -1,0 +1,16 @@
+CREATE OR REPLACE FUNCTION valida_data_agendamento()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NEW.data_agendamento < CURRENT_TIMESTAMP THEN
+        RAISE EXCEPTION 'Não é permitido agendar consultas nesta data.';
+    END IF;
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER consulta_before_insert
+BEFORE INSERT ON consulta
+FOR EACH ROW
+EXECUTE FUNCTION valida_data_agendamento();

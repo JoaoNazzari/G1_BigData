@@ -1,0 +1,15 @@
+CREATE OR REPLACE FUNCTION consulta_possui_prescricao(consulta_id_param INT)
+RETURNS BOOLEAN AS $$
+DECLARE
+    tem_prescricao BOOLEAN;
+BEGIN
+
+    IF NOT EXISTS (SELECT 1 FROM consulta WHERE consulta_id = consulta_id_param) THEN
+        RAISE EXCEPTION 'Consulta com ID % não encontrada.', consulta_id;
+    END IF;
+
+    SELECT COUNT(*) > 0 INTO tem_prescricao FROM prescricao WHERE consulta_id = consulta_id_param;
+
+    RETURN tem_prescricao;
+END;
+$$ LANGUAGE plpgsql;

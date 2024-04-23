@@ -1,0 +1,21 @@
+CREATE OR REPLACE PROCEDURE marcar_presenca(in_consulta_id INT)
+AS $$
+BEGIN
+    
+    IF NOT EXISTS (SELECT 1 FROM consulta WHERE consulta_id = in_consulta_id) THEN
+        RAISE EXCEPTION 'Código de consulta inválido!';
+    END IF;
+
+      IF EXISTS (SELECT 1 FROM consulta WHERE consulta_id = in_consulta_id AND data_execucao IS NOT NULL) THEN
+        RAISE EXCEPTION 'A consulta já foi realizada!';
+    END IF;
+
+    UPDATE consulta
+    SET data_execucao = CURRENT_TIMESTAMP
+    WHERE consulta_id = in_consulta_id AND data_execucao IS NULL;
+
+      IF NOT FOUND THEN
+        RAISE EXCEPTION 'A consulta já foi realizada!';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;

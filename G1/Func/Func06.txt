@@ -1,0 +1,24 @@
+-- Retorna o nome do paciente, sua cidade e a data da consulta, com base no id da consulta.
+
+
+CREATE OR REPLACE FUNCTION consultar_dados_consulta(consulta_id_param INT)
+RETURNS TABLE (
+    nome_paciente VARCHAR(255),
+    cidade_paciente VARCHAR(100),
+    data_consulta TIMESTAMP
+)
+AS $$
+BEGIN
+
+    IF NOT EXISTS (SELECT 1 FROM consulta WHERE consulta_id = consulta_id_param) THEN
+        RAISE EXCEPTION 'Consulta com ID % não encontrada.', consulta_id_param;
+    END IF;
+
+    RETURN QUERY
+    SELECT p.nome_completo, c.nome, q.data_agendamento
+    FROM consulta q
+    INNER JOIN paciente p ON q.paciente_id = p.paciente_id
+    INNER JOIN cidade c ON p.cidade_id = c.cidade_id
+    WHERE q.consulta_id = consulta_id_param;
+END;
+$$ LANGUAGE plpgsql;
